@@ -1,0 +1,10 @@
+# Ignore project files that should not be in version control
+.vagrant/
+*.pem
+*.sql
+*.swp
+*.retry
+
+# Ignore OSX generated files
+.DS_Store
+._*

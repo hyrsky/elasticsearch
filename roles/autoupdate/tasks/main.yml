@@ -1,0 +1,6 @@
+---
+- include_tasks: autoupdate-RedHat.yml
+  when: ansible_os_family == 'RedHat' and autoupdate_enabled
+
+- include_tasks: autoupdate-Debian.yml
+  when: ansible_os_family == 'Debian' and autoupdate_enabled

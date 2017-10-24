@@ -1,0 +1,6 @@
+[elasticsearch]
+es.oikeuttaelaimille.fi es_instance_name=node1 is_master=True
+
+[elasticsearch:vars]
+ansible_user=ubuntu
+hostname=elasticsearch

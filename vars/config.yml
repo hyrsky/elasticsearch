@@ -1,0 +1,24 @@
+---
+ssh_max_auth_retries: 3
+ssh_print_last_log: True
+ssh_print_motd: True
+ssh_use_pam: True
+
+autoupdate_reboot: true
+autoupdate_blacklist:
+  - elasticsearch 
+
+es_major_version: "5.x"
+es_version: "5.6.9"
+es_heap_size: 384m
+es_jvm_custom_parameters:
+  - '-Djava.net.preferIPv4Stack=true'
+
+# es_config structure is in ansible vault because it contains credentials.
+
+firewall_allowed_tcp_ports:
+  - "22"
+  - "9200"
+firewall_log_dropped_packets: true
+firewall_disable_firewalld: true
+firewall_disable_ufw: true

@@ -1,0 +1,8 @@
+---
+autoupdate_enabled: true
+autoupdate_reboot: false
+autoupdate_blacklist: []
+
+# Autoupdate mail settings used on Debian/Ubuntu only.
+autoupdate_mail_to: ""
+autoupdate_mail_on_error: true

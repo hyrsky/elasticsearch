@@ -1,0 +1,14 @@
+---
+- name: Change hostname
+  hostname:
+    name: "{{ hostname }}"
+  when: (hostname is defined)
+
+# Hostname not set correctly on Ubuntu
+# https://github.com/ansible/ansible-modules-core/issues/2308
+- name: Update hosts file
+  lineinfile:
+    dest: /etc/hosts
+    line: "127.0.0.1 {{ hostname }}"
+    insertafter: "^127.0.0.1 localhost.*$"
+  when: (hostname is defined) and (ansible_distribution == 'Ubuntu')

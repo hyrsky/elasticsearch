@@ -1,0 +1,70 @@
+---
+- name: Bootstrap server
+  hosts: elasticsearch
+  become: yes
+  gather_facts: False
+
+  vars_files:
+    - vars/config.yml
+    - vars/vault.yml
+
+  vars:
+    # If elasticsearch is be behind firewall wait_for port is going to fail.
+    es_start_service: False
+
+  pre_tasks:
+    - name: Install python for Ansible
+      raw: bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qqy python-minimal)"
+      register: output
+      changed_when:
+        - output.stdout != ""
+        - output.stdout != "\r\n"
+
+    - name: Gathering Facts
+      setup:
+
+    - name: Add local SSH public key to admin account authorized_keys
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ lookup('file', lookup('first_found', ['~/.ssh/id_ed25519.pub', '~/.ssh/id_rsa.pub'])) }}"
+        manage_dir: yes
+      when: ansible_user is defined
+
+    - name: Install module dependencies
+      package:
+        state: present
+        name: "{{ item }}"
+      with_items:
+        - unzip
+
+    - name: Find readonlyrest package
+      set_fact:
+        readonlyrest_packages: "{{ [item] + readonlyrest | default([]) }}"
+      when: es_version in item
+      with_fileglob:
+        - 'files/readonlyrest-*.zip'
+
+    - fail:
+        msg: Unable to locate readonlyrest package for elasticsearch {{ es_version }}
+      when: readonlyrest_packages is not defined
+
+    - name: Transfer readonlyrest package
+      copy:
+        src: "{{ readonlyrest_packages | first }}"
+        dest: /root/{{ readonlyrest_packages | first | basename }}
+
+    - name: Define es_plugins
+      set_fact:
+        es_plugins:
+          - plugin: file:///root/{{ readonlyrest_packages | first | basename }}
+
+  roles:
+    - { role: hostname }
+    - { role: autoupdate }
+    - { role: dev-sec.ssh-hardening }
+    - { role: geerlingguy.firewall }
+    - { role: elastic.elasticsearch }
+
+  tasks:
+    - name: Make sure elasticsearch is started
+      service: name={{instance_init_script | basename}} state=restarted enabled=yes
